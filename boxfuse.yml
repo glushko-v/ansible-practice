@@ -28,10 +28,10 @@
   hosts: web
 
   tasks:
-#    - name: installing tomcat
-#      apt: 
-#        name: tomcat8
-#        state: present
+    - name: installing tomcat
+      apt: 
+        name: tomcat8
+        state: present
 
     - name: ensure tomcat is started
       service:
