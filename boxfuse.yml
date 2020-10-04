@@ -1,0 +1,54 @@
+---
+- name: packaging file 
+  hosts: db
+  
+  tasks:
+    - name: cloning boxfuse repository from github
+      git:
+        repo: https://github.com/boxfuse/boxfuse-sample-java-war-hello
+        dest: /usr/boxfuse
+      become: yes
+    
+    - name: install openjdk
+      apt: 
+        name: openjdk-8-jdk
+        state: present
+  
+    - name: install maven
+      apt:
+        name: maven
+        state: present
+
+    - name: packaging project
+      command: mvn package
+      args: 
+         chdir: /usr/boxfuse
+
+- name: production
+  hosts: web
+
+  tasks:
+#    - name: installing tomcat
+#      apt: 
+#        name: tomcat8
+#        state: present
+
+    - name: ensure tomcat is started
+      service:
+        name: tomcat8
+        state: started
+      become: yes
+      become_method: sudo
+
+- name: copying file to webapps
+  hosts: web
+   
+  tasks:
+  - name: synchronizing files
+    synchronize:
+        mode: pull
+        src: rsync://root@165.227.128.169:/usr/boxfuse/target/hello
+        dest: /var/lib/tomcat8/webapps
+        rsync_path: /usr/bin
+   # delegate_to: web      
+
